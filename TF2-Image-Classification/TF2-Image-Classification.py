@@ -76,6 +76,7 @@ num_classes = len(class_names)
 
 model = tf.keras.Sequential()
 
+# This is the base model
 model.add(layers.Rescaling(1. / 255.0, input_shape=(image_height, image_width, 3)))     # rescaling layer to make RGB values smaller
 model.add(layers.Conv2D(16, 3, padding='same', activation='relu'))                      # convolutional layer with 16 output channels, Recitfied Linear Activation function (outputs input if it is positive, otherwise 0) (it decides if a nueron should be activated or not)
 model.add(layers.MaxPooling2D())                                                        # downsamples, lowers resolution, so model can better adapt to image shifts
@@ -87,14 +88,66 @@ model.add(layers.Flatten())                                                     
 model.add(layers.Dense(128, activation='relu'))                                         # 
 model.add(layers.Dense(num_classes))                                                    # final output layer
 
+#(IT WILL SEVERELY OVERFIT, UNCOMMENT FOLLOWING LINES TO SEE IT)
 
-# compile the model
+# # compile the model
+# model.compile(optimizer='adam',
+#               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+#               metrics=['accuracy'])
+
+# # training epoch #
+# epochs=10
+
+# # trains the model
+# history = model.fit(
+#   train_dataset,
+#   validation_data=validation_dataset,
+#   epochs=epochs
+# )
+
+# plt.plot(history.history['accuracy'])
+# plt.plot(history.history['val_accuracy'])
+# plt.plot(history.history['loss'])
+# plt.plot(history.history['val_loss'])
+# plt.show()
+
+# The problem  with this model is that it severely overfits (look at val vs train accuracy)
+# We are going to use data augmentation to solve this
+data_augmentation = keras.Sequential(
+    [
+        layers.RandomFlip("horizontal", input_shape=(image_height, image_width, 3)),        # random horizontal flip
+        layers.RandomRotation(0.1),                                                         # random rotation
+        layers.RandomZoom(0.1)                                                              # random zoom
+    ]
+)
+
+# We can also use dropout to reduce overfitting
+# dropout will randomly make some nuerons drop their output in the model so the model places less weight/bias on them
+
+model = Sequential([
+  data_augmentation,
+  layers.Rescaling(1./255),
+  layers.Conv2D(16, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Conv2D(32, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Conv2D(64, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Dropout(0.2),                                              # randomly drops 20% of output units of the layer
+  layers.Flatten(),
+  layers.Dense(128, activation='relu'),
+  layers.Dense(num_classes, name="outputs")
+])
+
+# compile model
 model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
 
-# training epoch #
-epochs=10
+# model.summary()
+
+# epoch #
+epochs = 15
 
 # trains the model
 history = model.fit(
@@ -102,3 +155,11 @@ history = model.fit(
   validation_data=validation_dataset,
   epochs=epochs
 )
+
+# much better results, red line is usually val_loss, 
+plt.plot(history.history['accuracy'], label="accuracy")
+plt.plot(history.history['val_accuracy'], label="val_accuracy")
+plt.plot(history.history['loss'], label="loss")
+plt.plot(history.history['val_loss'], label="val_loss")
+plt.legend(loc='lower right')
+plt.show()
