@@ -39,8 +39,8 @@ model.add(layers.Conv2D(64, (3,3), activation='relu'))                          
 
 # model.summary()
 
-model.add(layers.Flatten())                             # unrolls 3D tensor to 1D
-model.add(layers.Dense(64, activation='relu'))                 # final Conv2D has 64 channels, therefor output tensor has 64 channels
+model.add(layers.Flatten())                                    # unrolls 3D tensor to 1D
+model.add(layers.Dense(64, activation='relu'))                 # final Conv2D has 64 channels, therefore output tensor has 64 channels
 model.add(layers.Dense(10))                                    # output layer (has to equal to number of classes)
 
 # model.summary()
