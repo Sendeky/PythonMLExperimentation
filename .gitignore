@@ -1,3 +1,6 @@
+# MacOS stuff
+.DS_Store
+
 # ignore dataset files
 TF2-Image-Classification/flower_photos
 
