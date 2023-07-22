@@ -3,6 +3,7 @@
 
 # ignore dataset files
 TF2-Image-Classification/flower_photos
+PyTorch-DCGAN/data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
